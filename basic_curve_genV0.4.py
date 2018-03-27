@@ -1,3 +1,4 @@
+import matplotlib.pyplot as plt
 from astropy.io import fits
 from os import listdir
 from os.path import isfile, join
@@ -59,22 +60,25 @@ def get_bright_pixel_time(head):
     """
     time_obs = []
     for i in range(head['NAXIS3']):
-        time_obs.append(head['UTCS_OBS'] + i * head['FRAMTIME'])  # Assuming Delay between frames is totally dependent on FRAMTIME. Will need to check with mentor
+        time_obs.append(head['UTCS_OBS'] + i * head['FRAMEDLY'])  # Assuming Delay between frames is totally dependent on FRAMEDLY. Will need to check with mentor
     return time_obs
 
 path = "/home/tachyon/Lab/PreCode/datafiles/"                    # Will get all the files within the given directory
 only_files = [f for f in listdir(path) if isfile(join(path, f))]
-
-fin = []
-for i in range(len(only_files)):
-    fin.append(fits.open(path+only_files[i]))
-
 data_handler = []
 for i in range(len(only_files)):
+    fin = fits.open(path+only_files[i])
     #data_handler.append(fin[i][0].data)
     print "Cube Name:", only_files[i], "Cube No.: ", i
-    print "Peak intensities: ", get_bright_pixel_intensity(fin[i][0].data)
-    print "Peak locations: ", get_bright_pixel_location(fin[i][0].data)
-    print "Peak time:", get_bright_pixel_time(fin[i][0].header)
+    #print "Peak intensities: ", get_bright_pixel_intensity(fin[i][0].data)
+    #print "Peak locations: ", get_bright_pixel_location(fin[i][0].data)
+    #print "Peak time:", get_bright_pixel_time(fin[i][0].header)
+    plt.plot(get_bright_pixel_time(fin[0].header), get_bright_pixel_intensity(fin[0].data), 'ro')
+    fin.close()
     print "\n\n"
+plt.ylabel('Pixel Value')
+plt.xlabel('UTCS_OBS Time in seconds')
+plt.title('Plot of Pixel Value Vs Time')
+plt.show()
+
 
